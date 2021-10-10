@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom'
+// import { Link } from 'react-router-dom'
+import { connect } from 'react-redux';
+import { addPageNumber } from '../reducers/counter/action'
 
 const TemplateBlock = styled.div`
   width: 700px;
@@ -12,8 +14,9 @@ const TemplateBlock = styled.div`
   margin: 0 auto; // 페이지 중앙에 나타나도록 설정
   margin-top: 200px;
   border:  2px solid black;
+  text-align: center;
   div { // 답변 부분
-    margin: 40px 0px 40px 92px;
+    margin: 40px 0px 40px 0px;
   }
   h1 {
     text-align: center;
@@ -24,9 +27,10 @@ const TemplateBlock = styled.div`
 const NextButton = styled.button`
   width: 150px;
   height: 35px;
-  margin : auto;
-  display: block; // margin : auto 로 가운데 정렬하기 위해선 block 이여야 된다.
-  margin-top: 0px;
+  margin: 10px;
+  /* margin : auto; */
+  /* display: block; // margin : auto 로 가운데 정렬하기 위해선 block 이여야 된다. => 가운데 정렬을 부모에 text-align: center; 로 해결*/
+  /* margin-top: 0px; */
   border-radius: 16px;
   border: 0; //버튼 테두리 없애기
   background-color: #e9ecef;
@@ -53,7 +57,7 @@ class QuestionPage extends Component {
 
   componentDidMount() {
     console.log('did Mount')
-    fetch('//localhost:3001/question/1').then((data) => {
+    fetch(`//localhost:3001/question/${this.props.count}`).then((data) => {
       if(data.ok) {
         data.json().then((res) => {
           this.setState({data: res});
@@ -61,6 +65,7 @@ class QuestionPage extends Component {
           this.selectbox(res.answer);
           console.log(this.state.data)
           console.log(res.answer)
+          console.log(this.props.count)
         })
       }
     });
@@ -69,10 +74,8 @@ class QuestionPage extends Component {
   selectbox(answer) {
     let list = '';
     answer.forEach((item, itemIndex) => {
-      console.log(item[`type${itemIndex + 1}`])
       list += `${itemIndex + 1} ) ${item[`type${itemIndex + 1}`]}`;
     })
-    console.log(list)
     this.setState({answer: list});
   }
 // ===========
@@ -80,16 +83,36 @@ class QuestionPage extends Component {
     <>
       <TemplateBlock>
           {console.log('renderrrr')}
-          { this.state.data !== undefined && this.state.data.question }
-          { this.state.data.answer !== undefined && this.state.answer }
-          <Link to="/result">
-            <NextButton> 다음 </NextButton>
-          </Link>
+          <h1>
+            { this.state.data !== undefined && this.state.data.question }
+          </h1>
+          <div>
+            { this.state.data.answer !== undefined && this.state.answer }
+          </div>
+
+          {/* <Link to="/result"> */}
+            <NextButton onClick={() => this.props.addPageNumber()}> 다음 </NextButton>
+          {/* </Link> */}
+
+          <p>페이지 수 : {this.props.count}</p>
+          <button onClick={() => this.props.addPageNumber()}>페이지 넘기기</button>
+
       </TemplateBlock>
     </>
 
 }
 
-export default QuestionPage;
+//state를 funtion 형태로 넘겨줘야한다. -> redux connect 공식문서 참고, reducers와 연결
+const mapStateToProps = (state) => {
+  return {
+    count: state.count // count 가 props로 전달 된다.
+  }
+}
 
-
+//state.count + 1 수행하는걸 연결해주기 위해 dispatch 사용
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addPageNumber: () => dispatch(addPageNumber())
+  }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(QuestionPage);

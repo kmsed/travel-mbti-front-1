@@ -7,6 +7,9 @@ import MbtiResult from './pages/MbtiResult';
 import img from './travel.jpg';
 import { HashRouter, Route } from 'react-router-dom';
 
+import { Provider } from 'react-redux'
+import store from './reducers/store';
+
 //공통적용 부분
 const BackStyle =  styled.div`
   position: absolute;
@@ -21,6 +24,7 @@ const BackStyle =  styled.div`
 
 const App = () => {
   return (
+    <Provider store={store}>
       <BackStyle>
         <HashRouter>
           <Route  exact path="/" component={MbtiStart} />
@@ -28,6 +32,7 @@ const App = () => {
           <Route path="/result" component={MbtiResult} />
         </HashRouter>
       </BackStyle>
+    </Provider>
   );
 }
 
